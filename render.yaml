@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: tracking-system
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: SHOPIFY_STORE_DOMAIN
+        value: q1wpgq-qn.myshopify.com
+      - key: SHOPIFY_CLIENT_ID
+        sync: false
+      - key: SHOPIFY_CLIENT_SECRET
+        sync: false
+      - key: KLAVIYO_PRIVATE_KEY
+        sync: false
+      - key: PORT
+        value: "3456"
+      - key: LOG_LEVEL
+        value: info
+      - key: POLLING_INTERVAL_MS
+        value: "1800000"
+      - key: POLLING_ORDERS_DAYS
+        value: "30"
+      - key: NO_UPDATE_LEVEL1_HOURS
+        value: "24"
+      - key: NO_UPDATE_LEVEL2_HOURS
+        value: "72"
+      - key: NO_UPDATE_LEVEL3_HOURS
+        value: "120"
+      - key: NO_UPDATE_EXCEPTION_HOURS
+        value: "168"
+      - key: STORE_TYPE
+        value: json
+      - key: STORE_JSON_PATH
+        value: ./data/order-states.json
+      - key: STOP_TRACKING_AFTER_DAYS
+        value: "45"

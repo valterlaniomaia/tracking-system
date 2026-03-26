@@ -17,7 +17,7 @@ export async function sendEvent(eventPayload) {
   }
 
   const url = `${baseUrl}/events`;
-  const metricName = eventPayload?.data?.attributes?.metric?.name || 'unknown';
+  const metricName = eventPayload?.data?.attributes?.metric?.data?.attributes?.name || 'unknown';
   const uniqueId = eventPayload?.data?.attributes?.unique_id || '';
 
   log.info('Sending Klaviyo event', { metric: metricName, uniqueId });

@@ -96,10 +96,12 @@ async function processTrackingUpdate({
 
       try {
         await sendEvent(payload);
-        await store.recordEvent(orderId, {
+        order.eventsSent = order.eventsSent || [];
+        order.eventsSent.push({
           metricName,
           level,
           uniqueId: generateUniqueId(orderId, metricName, level),
+          sentAt: new Date().toISOString(),
         });
       } catch (err) {
         log.error('Failed to send Klaviyo event, order state still saved', {
@@ -130,10 +132,12 @@ async function processTrackingUpdate({
 
     try {
       await sendEvent(payload);
-      await store.recordEvent(orderId, {
+      order.eventsSent = order.eventsSent || [];
+      order.eventsSent.push({
         metricName,
         level: 0,
         uniqueId: generateUniqueId(orderId, metricName, 0),
+        sentAt: new Date().toISOString(),
       });
     } catch (err) {
       log.error('Failed to send Klaviyo event, order state still saved', {
