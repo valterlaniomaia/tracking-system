@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr>
+<td style="background-color:#F44336;padding:30px 40px;text-align:center;">
+  <h1 style="color:#ffffff;margin:0;font-size:24px;">⚠️ Important Update About Your Order</h1>
+</td>
+</tr>
+
+<tr>
+<td style="padding:40px;">
+  <p style="font-size:16px;color:#333;line-height:1.6;margin:0 0 20px;">
+    We're reaching out about your order <strong>{{ event.order_number }}</strong>. We've noticed an issue with the shipping status and want to make sure you're taken care of.
+  </p>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffebee;border-radius:8px;border-left:4px solid #F44336;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:14px;color:#C62828;margin:0;line-height:1.5;">
+      ⚠️ <strong>There may be a delay with your shipment.</strong> This can happen due to customs processing, carrier delays, or address verification. Our team is monitoring your package and will ensure it reaches you.
+    </p>
+  </td></tr>
+  </table>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa;border-radius:8px;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">TRACKING NUMBER</p>
+    <p style="font-size:16px;color:#333;margin:0 0 15px;font-weight:bold;">{{ event.tracking_number }}</p>
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">ORDER NUMBER</p>
+    <p style="font-size:16px;color:#333;margin:0;font-weight:bold;">{{ event.order_number }}</p>
+  </td></tr>
+  </table>
+
+  <h3 style="font-size:16px;color:#333;margin:30px 0 15px;">What are we doing?</h3>
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:8px 0;font-size:14px;color:#333;">🔍 Investigating the shipping status with our carrier</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#333;">📞 Coordinating to resolve any delays</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#333;">📧 We'll update you as soon as we have more info</td></tr>
+  </table>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:25px 0;">
+  <tr><td align="center">
+    <a href="{{ event.tracking_url }}" style="display:inline-block;background-color:#1a1a2e;color:#ffffff;padding:14px 40px;border-radius:6px;text-decoration:none;font-size:16px;font-weight:bold;">Check Tracking Status</a>
+  </td></tr>
+  </table>
+
+  <p style="font-size:14px;color:#666;line-height:1.6;margin:25px 0 0;">
+    <strong>Need help?</strong> Simply reply to this email and our support team will assist you within 24 hours. Your satisfaction is our top priority.
+  </p>
+</td>
+</tr>
+
+<tr>
+<td style="background-color:#f8f8f8;padding:25px 40px;text-align:center;border-top:1px solid #eee;">
+  <p style="font-size:12px;color:#999;margin:0;">Zaprada Store | contact@zaprada.com</p>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

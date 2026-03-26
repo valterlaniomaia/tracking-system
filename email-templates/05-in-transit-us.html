@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr>
+<td style="background-color:#1a1a2e;padding:30px 40px;text-align:center;">
+  <h1 style="color:#ffffff;margin:0;font-size:24px;">🚛 Almost There! Your Package Is in the US</h1>
+</td>
+</tr>
+
+<tr>
+<td style="padding:40px;">
+  <p style="font-size:16px;color:#333;line-height:1.6;margin:0 0 20px;">
+    Your order <strong>{{ event.order_number }}</strong> is now being delivered within the United States! It's on its way to you.
+  </p>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff3e0;border-radius:8px;border-left:4px solid #FF9800;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:14px;color:#E65100;margin:0;line-height:1.5;">
+      🚛 <strong>Your package is in domestic transit.</strong> It's being routed to your local delivery hub. You should receive it within <strong>1-3 business days</strong>.
+    </p>
+  </td></tr>
+  </table>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa;border-radius:8px;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">TRACKING NUMBER</p>
+    <p style="font-size:16px;color:#333;margin:0 0 15px;font-weight:bold;">{{ event.tracking_number }}</p>
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">CURRENT STATUS</p>
+    <p style="font-size:16px;color:#FF9800;margin:0;font-weight:bold;">In Transit — US Domestic Delivery</p>
+  </td></tr>
+  </table>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:25px 0;">
+  <tr><td align="center">
+    <a href="{{ event.tracking_url }}" style="display:inline-block;background-color:#FF9800;color:#ffffff;padding:14px 40px;border-radius:6px;text-decoration:none;font-size:16px;font-weight:bold;">Track My Package</a>
+  </td></tr>
+  </table>
+
+  <h3 style="font-size:16px;color:#333;margin:30px 0 15px;">📍 Shipping Progress</h3>
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Order confirmed</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Shipped from warehouse</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Departed origin</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Arrived in the US</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#FF9800;font-weight:bold;">🚛 In transit to you (you are here)</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ Delivered</td></tr>
+  </table>
+</td>
+</tr>
+
+<tr>
+<td style="background-color:#f8f8f8;padding:25px 40px;text-align:center;border-top:1px solid #eee;">
+  <p style="font-size:12px;color:#999;margin:0;">Zaprada Store | contact@zaprada.com</p>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr>
+<td style="background-color:#1a1a2e;padding:30px 40px;text-align:center;">
+  <h1 style="color:#ffffff;margin:0;font-size:24px;">🚚 Your Order Left the Warehouse!</h1>
+</td>
+</tr>
+
+<tr>
+<td style="padding:40px;">
+  <p style="font-size:16px;color:#333;line-height:1.6;margin:0 0 20px;">
+    Great news! Your order <strong>{{ event.order_number }}</strong> has been picked up by our shipping carrier and is now in transit.
+  </p>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e8f5e9;border-radius:8px;border-left:4px solid #4CAF50;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:14px;color:#2E7D32;margin:0;line-height:1.5;">
+      ✅ <strong>Tracking is now active!</strong> Your package has been scanned and is moving through the international shipping network. Estimated delivery: <strong>7-15 business days</strong>.
+    </p>
+  </td></tr>
+  </table>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa;border-radius:8px;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">TRACKING NUMBER</p>
+    <p style="font-size:16px;color:#333;margin:0 0 15px;font-weight:bold;">{{ event.tracking_number }}</p>
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">CURRENT STATUS</p>
+    <p style="font-size:16px;color:#4CAF50;margin:0;font-weight:bold;">In Transit — Left Origin Facility</p>
+  </td></tr>
+  </table>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:25px 0;">
+  <tr><td align="center">
+    <a href="{{ event.tracking_url }}" style="display:inline-block;background-color:#4CAF50;color:#ffffff;padding:14px 40px;border-radius:6px;text-decoration:none;font-size:16px;font-weight:bold;">
+      Track My Package
+    </a>
+  </td></tr>
+  </table>
+
+  <h3 style="font-size:16px;color:#333;margin:30px 0 15px;">📍 Shipping Progress</h3>
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Order confirmed</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Shipped from warehouse</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#4CAF50;font-weight:bold;">✅ In transit (you are here)</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ Arrived in the US</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ Out for delivery</td></tr>
+    <tr><td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ Delivered</td></tr>
+  </table>
+</td>
+</tr>
+
+<tr>
+<td style="background-color:#f8f8f8;padding:25px 40px;text-align:center;border-top:1px solid #eee;">
+  <p style="font-size:12px;color:#999;margin:0;">Zaprada Store | contact@zaprada.com</p>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

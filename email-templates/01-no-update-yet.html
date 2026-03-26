@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Order Is On Its Way</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+<!-- Header -->
+<tr>
+<td style="background-color:#1a1a2e;padding:30px 40px;text-align:center;">
+  <h1 style="color:#ffffff;margin:0;font-size:24px;">📦 Your Order Is On Its Way!</h1>
+</td>
+</tr>
+
+<!-- Body -->
+<tr>
+<td style="padding:40px;">
+  <p style="font-size:16px;color:#333;line-height:1.6;margin:0 0 20px;">
+    Hi there,
+  </p>
+  <p style="font-size:16px;color:#333;line-height:1.6;margin:0 0 20px;">
+    We wanted to let you know that your order <strong>{{ event.order_number }}</strong> has been shipped and is currently being processed by our shipping partner.
+  </p>
+
+  <!-- Info Box -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f7ff;border-radius:8px;border-left:4px solid #2196F3;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:14px;color:#1565C0;margin:0 0 8px;font-weight:bold;">ℹ️ Why haven't I seen tracking updates?</p>
+    <p style="font-size:14px;color:#555;margin:0;line-height:1.5;">
+      International shipments typically take <strong>3-5 business days</strong> before the first tracking scan appears. This is completely normal — your package is safely in transit and being processed through international logistics.
+    </p>
+  </td></tr>
+  </table>
+
+  <!-- Tracking Info -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa;border-radius:8px;margin:20px 0;">
+  <tr><td style="padding:20px;">
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">TRACKING NUMBER</p>
+    <p style="font-size:16px;color:#333;margin:0 0 15px;font-weight:bold;">{{ event.tracking_number }}</p>
+    <p style="font-size:13px;color:#888;margin:0 0 5px;">ORDER NUMBER</p>
+    <p style="font-size:16px;color:#333;margin:0;font-weight:bold;">{{ event.order_number }}</p>
+  </td></tr>
+  </table>
+
+  <!-- CTA Button -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:25px 0;">
+  <tr><td align="center">
+    <a href="{{ event.tracking_url }}" style="display:inline-block;background-color:#1a1a2e;color:#ffffff;padding:14px 40px;border-radius:6px;text-decoration:none;font-size:16px;font-weight:bold;">
+      Track My Order
+    </a>
+  </td></tr>
+  </table>
+
+  <!-- Timeline -->
+  <h3 style="font-size:16px;color:#333;margin:30px 0 15px;">📍 What happens next?</h3>
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Order confirmed</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#4CAF50;">✅ Shipped from warehouse</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#FF9800;font-weight:bold;">⏳ Processing by carrier (you are here)</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ In transit to the US</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ Out for delivery</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#ccc;">⬚ Delivered</td>
+    </tr>
+  </table>
+
+  <p style="font-size:14px;color:#666;line-height:1.6;margin:25px 0 0;">
+    We'll send you another email as soon as tracking updates are available. If you have any questions, simply reply to this email.
+  </p>
+</td>
+</tr>
+
+<!-- Footer -->
+<tr>
+<td style="background-color:#f8f8f8;padding:25px 40px;text-align:center;border-top:1px solid #eee;">
+  <p style="font-size:12px;color:#999;margin:0;">
+    Zaprada Store | contact@zaprada.com
+  </p>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
