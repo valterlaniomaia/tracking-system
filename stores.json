@@ -35,6 +35,41 @@
         "emergencyStop": false,
         "maxDailyResponses": 200
       }
+    },
+    "valestia": {
+      "name": "VALESTIA STORE",
+      "domain": "ihjpz4-i7.myshopify.com",
+      "shopify": {
+        "clientId": "ENV:VALESTIA_SHOPIFY_CLIENT_ID",
+        "clientSecret": "ENV:VALESTIA_SHOPIFY_CLIENT_SECRET",
+        "storeDomain": "ENV:VALESTIA_SHOPIFY_STORE_DOMAIN"
+      },
+      "klaviyo": {
+        "privateKey": "ENV:VALESTIA_KLAVIYO_KEY"
+      },
+      "parcelpanel": {
+        "webhookSecret": "ENV:VALESTIA_PARCELPANEL_SECRET"
+      },
+      "branding": {
+        "storeName": "Valestia",
+        "supportEmail": "support@valestia.co",
+        "supportName": "Valestia Support",
+        "tone": "friendly_reassuring",
+        "language": "en",
+        "signoff": "Best regards,\nValestia Support Team"
+      },
+      "policy": {
+        "deliveryEstimate": { "minDays": 7, "maxDays": 25 },
+        "refundPolicy": "30 days from delivery",
+        "reshipAfterDays": 30,
+        "returnWindow": 30
+      },
+      "ai": {
+        "mode": "suggest",
+        "autoRespondEnabled": false,
+        "emergencyStop": false,
+        "maxDailyResponses": 200
+      }
     }
   },
   "defaults": {
