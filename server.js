@@ -7,6 +7,10 @@ import { startPolling, getLastPollAt, getPollStats } from './src/polling/poller.
 import { getStore } from './src/store/index.js';
 import { createLogger } from './src/utils/logger.js';
 
+// Multi-store imports
+import { loadStoresConfig } from './src/multi-store/store-config.js';
+import { initRegistry, getContext, getRegisteredStoreIds } from './src/multi-store/store-registry.js';
+
 const log = createLogger('server');
 const app = express();
 const startedAt = new Date().toISOString();
@@ -22,18 +26,25 @@ app.use(
 
 // ── Webhook Endpoints ──
 
+// Legacy (backward compat): /webhook/parcelpanel → default store
 app.post('/webhook/parcelpanel', handleParcelPanelWebhook);
+
+// Multi-store: /webhook/parcelpanel/:storeId
+app.post('/webhook/parcelpanel/:storeId', handleParcelPanelWebhook);
+
 app.post('/webhook/shopify', handleShopifyWebhook);
 
 // ── Health Endpoints ──
 
 app.get('/health', async (_req, res) => {
   const store = await getStore();
+  const storeIds = getRegisteredStoreIds();
   res.json({
     status: 'ok',
-    version: '1.0.0',
+    version: '2.0.0',
     uptime: process.uptime(),
     startedAt,
+    multiStore: { enabled: true, stores: storeIds },
     storeCount: await store.count(),
     lastPollAt: getLastPollAt(),
     lastWebhookAt: getLastWebhookAt(),
@@ -42,11 +53,29 @@ app.get('/health', async (_req, res) => {
 
 app.get('/health/detail', async (_req, res) => {
   const store = await getStore();
+  const storeIds = getRegisteredStoreIds();
+
+  // Per-store stats
+  const storesDetail = {};
+  for (const id of storeIds) {
+    try {
+      const ctx = getContext(id);
+      const s = ctx.clients.orderStore;
+      storesDetail[id] = {
+        orderCount: await s.count(),
+        ordersByStatus: await s.countByStatus(),
+      };
+    } catch {
+      storesDetail[id] = { error: 'failed to load' };
+    }
+  }
+
   res.json({
     status: 'ok',
-    version: '1.0.0',
+    version: '2.0.0',
     uptime: process.uptime(),
     startedAt,
+    multiStore: { enabled: true, stores: storeIds, detail: storesDetail },
     storeCount: await store.count(),
     ordersByStatus: await store.countByStatus(),
     lastPollAt: getLastPollAt(),
@@ -121,15 +150,26 @@ app.get('/test/order/:orderId', async (req, res) => {
 // ── Start ──
 
 async function start() {
-  // Initialize store
+  // Initialize multi-store
+  if (config.multiStore.enabled) {
+    try {
+      loadStoresConfig(config.multiStore.configPath);
+      await initRegistry();
+      log.info('Multi-store registry initialized');
+    } catch (err) {
+      log.error('Failed to init multi-store, falling back to legacy', { error: err.message });
+    }
+  }
+
+  // Initialize legacy store (backward compat — uses multi-store if available)
   await getStore();
   log.info('Store initialized');
 
   // Start Express
   app.listen(config.server.port, () => {
-    log.info(`Tracking system running on port ${config.server.port}`);
+    log.info(`Tracking system v2.0.0 running on port ${config.server.port}`);
     log.info('Endpoints:', {
-      webhooks: ['/webhook/parcelpanel', '/webhook/shopify'],
+      webhooks: ['/webhook/parcelpanel', '/webhook/parcelpanel/:storeId', '/webhook/shopify'],
       health: ['/health', '/health/detail'],
     });
   });

@@ -1,0 +1,59 @@
+{
+  "stores": {
+    "zaprada": {
+      "name": "ZAPRADA STORE",
+      "domain": "q1wpgq-qn.myshopify.com",
+      "default": true,
+      "shopify": {
+        "clientId": "ENV:SHOPIFY_CLIENT_ID",
+        "clientSecret": "ENV:SHOPIFY_CLIENT_SECRET",
+        "storeDomain": "ENV:SHOPIFY_STORE_DOMAIN"
+      },
+      "klaviyo": {
+        "privateKey": "ENV:KLAVIYO_PRIVATE_KEY"
+      },
+      "parcelpanel": {
+        "webhookSecret": "ENV:PARCELPANEL_WEBHOOK_SECRET"
+      },
+      "branding": {
+        "storeName": "Zaprada",
+        "supportEmail": "support@zapradastore.com",
+        "supportName": "Zaprada Support",
+        "tone": "friendly_reassuring",
+        "language": "en",
+        "signoff": "Best regards,\nZaprada Support Team"
+      },
+      "policy": {
+        "deliveryEstimate": { "minDays": 7, "maxDays": 25 },
+        "refundPolicy": "30 days from delivery",
+        "reshipAfterDays": 30,
+        "returnWindow": 30
+      },
+      "ai": {
+        "mode": "suggest",
+        "autoRespondEnabled": false,
+        "emergencyStop": false,
+        "maxDailyResponses": 200
+      }
+    }
+  },
+  "defaults": {
+    "fallbackStoreId": "zaprada",
+    "useFallbackOnUnknown": false,
+    "polling": {
+      "intervalMs": 1800000,
+      "ordersDays": 30
+    },
+    "thresholds": {
+      "noUpdateLevel1Hours": 24,
+      "noUpdateLevel2Hours": 72,
+      "noUpdateLevel3Hours": 120,
+      "noUpdateExceptionHours": 168,
+      "stopTrackingAfterDays": 45
+    },
+    "globalLimits": {
+      "MAX_GLOBAL_DAILY_CLASSIFICATION_CALLS": 2000,
+      "MAX_GLOBAL_DAILY_GENERATION_CALLS": 500
+    }
+  }
+}

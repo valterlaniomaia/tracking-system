@@ -55,6 +55,11 @@ export const config = {
     jsonPath: env('STORE_JSON_PATH', './data/order-states.json'),
   },
 
+  multiStore: {
+    enabled: env('MULTI_STORE_ENABLED', 'true') === 'true',
+    configPath: env('STORES_CONFIG_PATH', './stores.json'),
+  },
+
   statusToMetric: {
     no_update_yet: 'Tracking No Update Yet',
     in_transit_china: 'Tracking In Transit China',
