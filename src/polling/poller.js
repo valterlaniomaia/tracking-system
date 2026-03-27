@@ -1,7 +1,6 @@
 import { config } from '../../config.js';
 import { getStore } from '../store/index.js';
 import { getFulfilledOrders } from './shopify-client.js';
-import { processTrackingUpdate } from '../webhook/handler.js';
 import {
   shouldFireNoUpdateYet,
   shouldTransitionToException,
@@ -24,22 +23,34 @@ export function getPollStats() {
   return { ...pollStats };
 }
 
-async function pollOnce() {
-  const startTime = Date.now();
-  lastPollAt = new Date().toISOString();
-  pollStats = { ordersChecked: 0, eventsFired: 0, errors: 0 };
+/**
+ * Poll a single store for fulfilled orders and process no_update_yet escalation.
+ * @param {object} storeCtx - { orderStore, shopifyConfig, klaviyoApiKey, storeId }
+ */
+async function pollStore(storeCtx) {
+  const { orderStore, shopifyConfig, klaviyoApiKey, storeId } = storeCtx;
+  const pollingDays = config.polling.ordersDays;
 
-  log.info('Polling cycle started');
+  // Build shopify credentials for this store
+  const creds = shopifyConfig.clientId && shopifyConfig.clientSecret
+    ? { storeDomain: shopifyConfig.storeDomain, clientId: shopifyConfig.clientId, clientSecret: shopifyConfig.clientSecret }
+    : null;
+
+  if (!creds) {
+    log.warn('Shopify credentials not configured for store, skipping poll', { storeId });
+    return { checked: 0, fired: 0, errors: 0 };
+  }
+
+  let checked = 0, fired = 0, errors = 0;
 
   try {
-    const store = await getStore();
-    const shopifyOrders = await getFulfilledOrders(config.polling.ordersDays);
+    const shopifyOrders = await getFulfilledOrders(pollingDays, creds);
 
     for (const shopOrder of shopifyOrders) {
-      pollStats.ordersChecked++;
+      checked++;
 
       try {
-        let order = await store.get(shopOrder.orderId);
+        let order = await orderStore.get(shopOrder.orderId);
 
         // New order — add to store
         if (!order) {
@@ -54,28 +65,25 @@ async function pollOnce() {
             fulfillmentDate: shopOrder.fulfillmentDate,
             eventsSent: [],
           };
-          await store.set(shopOrder.orderId, order);
+          await orderStore.set(shopOrder.orderId, order);
         }
 
         // Update email/tracking if missing
         if (!order.email && shopOrder.email) {
           order.email = shopOrder.email;
-          await store.set(order.orderId, order);
+          await orderStore.set(order.orderId, order);
         }
 
         // Skip if we should stop tracking
         if (shouldStopTracking(order)) continue;
-
-        // Skip if already delivered
         if (order.currentStatus === 'delivered') continue;
 
         // Check for no_update_yet escalation
         if (!order.currentStatus || order.currentStatus === 'no_update_yet') {
-          // Always set status to no_update_yet if not yet set
           if (!order.currentStatus) {
             order.currentStatus = 'no_update_yet';
             order.lastStatusAt = new Date().toISOString();
-            await store.set(order.orderId, order);
+            await orderStore.set(order.orderId, order);
           }
 
           // Check if should transition to exception
@@ -102,14 +110,14 @@ async function pollOnce() {
               });
 
               try {
-                await sendEvent(payload);
-                await store.recordEvent(order.orderId, { metricName, level: 0, uniqueId });
-                pollStats.eventsFired++;
+                await sendEvent(payload, klaviyoApiKey);
+                await orderStore.recordEvent(order.orderId, { metricName, level: 0, uniqueId });
+                fired++;
               } catch (err) {
-                log.error('Failed to send exception event', { orderId: order.orderId, error: err.message });
+                log.error('Failed to send exception event', { orderId: order.orderId, storeId, error: err.message });
               }
               order.currentStatus = 'exception';
-              await store.set(order.orderId, order);
+              await orderStore.set(order.orderId, order);
             }
             continue;
           }
@@ -137,21 +145,71 @@ async function pollOnce() {
             });
 
             try {
-              await sendEvent(payload);
-              await store.recordEvent(order.orderId, { metricName, level, uniqueId });
-              pollStats.eventsFired++;
+              await sendEvent(payload, klaviyoApiKey);
+              await orderStore.recordEvent(order.orderId, { metricName, level, uniqueId });
+              fired++;
             } catch (err) {
-              log.error('Failed to send no_update_yet event', { orderId: order.orderId, error: err.message });
+              log.error('Failed to send no_update_yet event', { orderId: order.orderId, storeId, error: err.message });
             }
           }
         }
       } catch (err) {
-        pollStats.errors++;
-        log.error('Error processing order in poll', {
-          orderId: shopOrder.orderId,
-          error: err.message,
-        });
+        errors++;
+        log.error('Error processing order in poll', { orderId: shopOrder.orderId, storeId, error: err.message });
       }
+    }
+  } catch (err) {
+    errors++;
+    log.error('Failed to fetch orders from Shopify', { storeId, error: err.message });
+  }
+
+  return { checked, fired, errors };
+}
+
+async function pollOnce() {
+  const startTime = Date.now();
+  lastPollAt = new Date().toISOString();
+  pollStats = { ordersChecked: 0, eventsFired: 0, errors: 0 };
+
+  log.info('Polling cycle started');
+
+  try {
+    // Try multi-store polling
+    const { getRegisteredStoreIds, getContext } = await import('../multi-store/store-registry.js');
+    const storeIds = getRegisteredStoreIds();
+
+    if (storeIds.length > 0) {
+      for (const storeId of storeIds) {
+        const ctx = getContext(storeId);
+        log.info(`Polling store: ${storeId}`);
+
+        const result = await pollStore({
+          orderStore: ctx.clients.orderStore,
+          shopifyConfig: ctx.clients.shopifyConfig,
+          klaviyoApiKey: ctx.clients.klaviyoApiKey,
+          storeId,
+        });
+
+        pollStats.ordersChecked += result.checked;
+        pollStats.eventsFired += result.fired;
+        pollStats.errors += result.errors;
+      }
+    } else {
+      // Fallback: legacy single-store polling
+      const store = await getStore();
+      const result = await pollStore({
+        orderStore: store,
+        shopifyConfig: {
+          storeDomain: config.shopify.storeDomain,
+          clientId: config.shopify.clientId,
+          clientSecret: config.shopify.clientSecret,
+        },
+        klaviyoApiKey: null, // uses global config
+        storeId: 'default',
+      });
+      pollStats.ordersChecked = result.checked;
+      pollStats.eventsFired = result.fired;
+      pollStats.errors = result.errors;
     }
 
     const duration = Date.now() - startTime;

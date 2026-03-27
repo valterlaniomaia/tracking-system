@@ -94,7 +94,14 @@ app.get('/health/detail', async (_req, res) => {
 // Send a test event to Klaviyo (validates API key + connection)
 app.post('/test/klaviyo', async (req, res) => {
   const email = req.body.email || 'test@example.com';
+  const storeId = req.body.storeId || null;
   try {
+    let apiKey = null;
+    try {
+      const ctx = getContext(storeId);
+      apiKey = ctx.clients.klaviyoApiKey;
+    } catch { /* use global fallback */ }
+
     const payload = buildEvent({
       email,
       mappedStatus: 'in_transit_china',
@@ -106,8 +113,8 @@ app.post('/test/klaviyo', async (req, res) => {
       description: 'Test event from tracking system',
       daysSinceShipped: 1,
     });
-    await sendEvent(payload);
-    res.json({ success: true, message: 'Klaviyo event sent', email });
+    await sendEvent(payload, apiKey);
+    res.json({ success: true, message: 'Klaviyo event sent', email, storeId: storeId || 'default' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

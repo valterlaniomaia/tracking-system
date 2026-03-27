@@ -20,7 +20,41 @@ export function getLastWebhookAt() {
 }
 
 /**
+ * Resolve the order store and Klaviyo API key for a given storeId.
+ * Falls back to defaults if storeId not provided or registry not available.
+ */
+async function resolveStoreContext(storeId) {
+  try {
+    const { getContext, hasStore } = await import('../multi-store/store-registry.js');
+    if (storeId && hasStore(storeId)) {
+      const ctx = getContext(storeId);
+      return {
+        store: ctx.clients.orderStore,
+        klaviyoApiKey: ctx.clients.klaviyoApiKey,
+        storeId,
+      };
+    }
+    // No storeId or unknown → use default
+    const ctx = getContext(); // default store
+    return {
+      store: ctx.clients.orderStore,
+      klaviyoApiKey: ctx.clients.klaviyoApiKey,
+      storeId: ctx.storeId,
+    };
+  } catch {
+    // Registry not available → legacy fallback
+    return {
+      store: await getStore(),
+      klaviyoApiKey: null, // will use config global
+      storeId: null,
+    };
+  }
+}
+
+/**
  * Process a tracking update: normalize → check rules → send Klaviyo event.
+ * @param {object} data - Tracking update data
+ * @param {string} [storeId] - Store ID for multi-store routing
  */
 async function processTrackingUpdate({
   orderId,
@@ -32,8 +66,10 @@ async function processTrackingUpdate({
   substatus,
   checkpoints,
   fulfillmentDate,
-}) {
-  const store = await getStore();
+}, storeId) {
+  const ctx = await resolveStoreContext(storeId);
+  const store = ctx.store;
+  const klaviyoApiKey = ctx.klaviyoApiKey;
 
   // Normalize
   const { mappedStatus, description } = normalizeStatus({
@@ -43,7 +79,7 @@ async function processTrackingUpdate({
     fulfillmentDate,
   });
 
-  log.info('Status normalized', { orderId, rawStatus, mappedStatus });
+  log.info('Status normalized', { orderId, rawStatus, mappedStatus, storeId: ctx.storeId });
 
   // Get or create order state
   let order = await store.get(orderId);
@@ -95,7 +131,7 @@ async function processTrackingUpdate({
       });
 
       try {
-        await sendEvent(payload);
+        await sendEvent(payload, klaviyoApiKey);
         order.eventsSent = order.eventsSent || [];
         order.eventsSent.push({
           metricName,
@@ -131,7 +167,7 @@ async function processTrackingUpdate({
     });
 
     try {
-      await sendEvent(payload);
+      await sendEvent(payload, klaviyoApiKey);
       order.eventsSent = order.eventsSent || [];
       order.eventsSent.push({
         metricName,
@@ -153,13 +189,25 @@ async function processTrackingUpdate({
 
 /**
  * Express handler for ParcelPanel webhooks.
+ * Supports: /webhook/parcelpanel and /webhook/parcelpanel/:storeId
  */
 export async function handleParcelPanelWebhook(req, res) {
   lastWebhookAt = new Date().toISOString();
+  const storeId = req.params?.storeId || null;
+
+  // Resolve webhook secret for this store
+  let webhookSecret = config.parcelpanel.webhookSecret;
+  try {
+    const { getContext } = await import('../multi-store/store-registry.js');
+    const ctx = getContext(storeId);
+    if (ctx.clients.parcelpanelSecret) {
+      webhookSecret = ctx.clients.parcelpanelSecret;
+    }
+  } catch { /* use global fallback */ }
 
   const signature = req.headers['x-parcelpanel-hmac-sha256'] || req.headers['x-pp-hmac-sha256'] || '';
-  if (!verifyParcelPanel(req.rawBody || '', signature)) {
-    log.warn('Invalid ParcelPanel webhook signature');
+  if (!verifyParcelPanel(req.rawBody || '', signature, webhookSecret)) {
+    log.warn('Invalid ParcelPanel webhook signature', { storeId });
     return res.status(401).json({ error: 'Invalid signature' });
   }
 
@@ -194,9 +242,9 @@ export async function handleParcelPanelWebhook(req, res) {
       substatus,
       checkpoints,
       fulfillmentDate,
-    });
+    }, storeId);
   } catch (err) {
-    log.error('Error processing ParcelPanel webhook', { error: err.message, stack: err.stack });
+    log.error('Error processing ParcelPanel webhook', { error: err.message, stack: err.stack, storeId });
   }
 }
 

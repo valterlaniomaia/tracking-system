@@ -4,16 +4,19 @@ import { createLogger } from '../utils/logger.js';
 
 const log = createLogger('shopify');
 
-let cachedAccessToken = null;
+// Token cache per store domain
+const tokenCache = new Map();
 
 /**
  * Get access token via client_credentials grant.
- * Same pattern as shopify-mcp/index.js.
+ * @param {object} [creds] - { storeDomain, clientId, clientSecret }. Falls back to config.
  */
-async function getAccessToken() {
-  if (cachedAccessToken) return cachedAccessToken;
+async function getAccessToken(creds) {
+  const storeDomain = creds?.storeDomain || config.shopify.storeDomain;
+  const clientId = creds?.clientId || config.shopify.clientId;
+  const clientSecret = creds?.clientSecret || config.shopify.clientSecret;
 
-  const { storeDomain, clientId, clientSecret } = config.shopify;
+  if (tokenCache.has(storeDomain)) return tokenCache.get(storeDomain);
 
   return withRetry(async () => {
     const url = `https://${storeDomain}/admin/oauth/access_token`;
@@ -35,18 +38,22 @@ async function getAccessToken() {
     }
 
     const data = await res.json();
-    cachedAccessToken = data.access_token;
-    log.info('Shopify access token obtained');
-    return cachedAccessToken;
+    tokenCache.set(storeDomain, data.access_token);
+    log.info('Shopify access token obtained', { storeDomain });
+    return data.access_token;
   }, 'shopify-token');
 }
 
 /**
  * Execute a GraphQL query against Shopify Admin API.
+ * @param {string} query - GraphQL query
+ * @param {object} [variables] - Query variables
+ * @param {object} [creds] - { storeDomain, clientId, clientSecret }. Falls back to config.
  */
-async function graphql(query, variables = {}) {
-  const { storeDomain, apiVersion } = config.shopify;
-  const token = await getAccessToken();
+async function graphql(query, variables = {}, creds) {
+  const storeDomain = creds?.storeDomain || config.shopify.storeDomain;
+  const apiVersion = config.shopify.apiVersion;
+  const token = await getAccessToken(creds);
   const url = `https://${storeDomain}/admin/api/${apiVersion}/graphql.json`;
 
   return withRetry(async () => {
@@ -61,10 +68,9 @@ async function graphql(query, variables = {}) {
 
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      // If 401, invalidate cached token
       if (res.status === 401) {
-        cachedAccessToken = null;
-        log.warn('Access token expired, will re-authenticate on next call');
+        tokenCache.delete(storeDomain);
+        log.warn('Access token expired, will re-authenticate on next call', { storeDomain });
       }
       const err = new Error(`Shopify GraphQL error: ${res.status} ${body}`);
       err.status = res.status;
@@ -81,8 +87,10 @@ async function graphql(query, variables = {}) {
 
 /**
  * Fetch fulfilled orders from the last N days.
+ * @param {number} [days] - How many days back to fetch
+ * @param {object} [creds] - { storeDomain, clientId, clientSecret }. Falls back to config.
  */
-export async function getFulfilledOrders(days = 30) {
+export async function getFulfilledOrders(days = 30, creds) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
   const query = `
@@ -130,7 +138,7 @@ export async function getFulfilledOrders(days = 30) {
       after: cursor,
     };
 
-    const data = await graphql(query, variables);
+    const data = await graphql(query, variables, creds);
     const edges = data?.orders?.edges || [];
 
     for (const edge of edges) {
@@ -157,6 +165,8 @@ export async function getFulfilledOrders(days = 30) {
     page++;
   }
 
-  log.info(`Fetched ${allOrders.length} fulfilled orders from Shopify`);
+  log.info(`Fetched ${allOrders.length} fulfilled orders from Shopify`, {
+    storeDomain: creds?.storeDomain || config.shopify.storeDomain,
+  });
   return allOrders;
 }

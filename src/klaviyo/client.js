@@ -7,9 +7,11 @@ const log = createLogger('klaviyo');
 /**
  * Send an event to Klaviyo Events API v3.
  * @param {object} eventPayload - The full Klaviyo event payload ({ data: { ... } })
+ * @param {string} [apiKey] - Klaviyo API key. If not provided, falls back to config.
  */
-export async function sendEvent(eventPayload) {
-  const { privateKey, apiRevision, baseUrl } = config.klaviyo;
+export async function sendEvent(eventPayload, apiKey) {
+  const privateKey = apiKey || config.klaviyo.privateKey;
+  const { apiRevision, baseUrl } = config.klaviyo;
 
   if (!privateKey) {
     log.error('Klaviyo private key not configured. Skipping event.');

@@ -7,8 +7,8 @@ const log = createLogger('validator');
 /**
  * Verify ParcelPanel webhook HMAC-SHA256 signature.
  */
-export function verifyParcelPanel(rawBody, signature) {
-  const secret = config.parcelpanel.webhookSecret;
+export function verifyParcelPanel(rawBody, signature, secretOverride) {
+  const secret = secretOverride || config.parcelpanel.webhookSecret;
   if (!secret) {
     log.warn('ParcelPanel webhook secret not configured, skipping verification');
     return true;
