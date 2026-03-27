@@ -70,6 +70,41 @@
         "emergencyStop": false,
         "maxDailyResponses": 200
       }
+    },
+    "velario": {
+      "name": "VELARIO STORE",
+      "domain": "1cm0v7-v3.myshopify.com",
+      "shopify": {
+        "clientId": "ENV:VELARIO_SHOPIFY_CLIENT_ID",
+        "clientSecret": "ENV:VELARIO_SHOPIFY_CLIENT_SECRET",
+        "storeDomain": "ENV:VELARIO_SHOPIFY_STORE_DOMAIN"
+      },
+      "klaviyo": {
+        "privateKey": "ENV:VELARIO_KLAVIYO_KEY"
+      },
+      "parcelpanel": {
+        "webhookSecret": "ENV:VELARIO_PARCELPANEL_SECRET"
+      },
+      "branding": {
+        "storeName": "Velario",
+        "supportEmail": "support@velariostore.com",
+        "supportName": "Velario Support",
+        "tone": "friendly_reassuring",
+        "language": "en",
+        "signoff": "Best regards,\nVelario Support Team"
+      },
+      "policy": {
+        "deliveryEstimate": { "minDays": 7, "maxDays": 25 },
+        "refundPolicy": "30 days from delivery",
+        "reshipAfterDays": 30,
+        "returnWindow": 30
+      },
+      "ai": {
+        "mode": "suggest",
+        "autoRespondEnabled": false,
+        "emergencyStop": false,
+        "maxDailyResponses": 200
+      }
     }
   },
   "defaults": {
